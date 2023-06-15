@@ -1,0 +1,31 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "firebase_windows_example",
+            "cwd": "example",
+            "request": "launch",
+            "type": "dart",
+            "args": ["-v"]
+        },
+        {
+            "name": "firebase_windows_example (profile mode)",
+            "cwd": "example",
+            "request": "launch",
+            "type": "dart",
+            "args": ["-v"],
+            "flutterMode": "profile"
+        },
+        {
+            "name": "firebase_windows_example (release mode)",
+            "cwd": "example",
+            "request": "launch",
+            "type": "dart",
+            "args": ["-v"],
+            "flutterMode": "release"
+        }
+    ]
+}
