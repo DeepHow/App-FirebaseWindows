@@ -1,5 +1,5 @@
 name: firebase_windows
-description: Windows implementations of Firebase for Flutter apps.
+description: Windows implementations of the Firebase Flutter plugin for Flutter apps.
 version: 0.0.1
 homepage: https://github.com/ipliu/firebase_windows
 

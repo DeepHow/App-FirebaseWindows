@@ -1,6 +1,6 @@
 # firebase_windows
 
-Windows implementations of Firebase for Flutter apps.
+Windows implementations of the Firebase Flutter plugin for Flutter apps.
 
 ## Getting Started
 
