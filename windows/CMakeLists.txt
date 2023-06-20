@@ -91,7 +91,9 @@ target_compile_definitions(${PLUGIN_NAME} PRIVATE FLUTTER_PLUGIN_IMPL)
 # dependencies here.
 set(MSVC_RUNTIME_MODE MD)
 set(ADDITIONAL_LIBS advapi32 ws2_32 crypt32)
-add_subdirectory(${FIREBASE_CPP_SDK_DIR} bin/ EXCLUDE_FROM_ALL)
+if (NOT TARGET firebase_app)
+    add_subdirectory(${FIREBASE_CPP_SDK_DIR} bin/ EXCLUDE_FROM_ALL)
+endif()
 target_include_directories(${PLUGIN_NAME} INTERFACE
   "${FIREBASE_CPP_SDK_DIR}/include")
 set(firebase_libs firebase_auth firebase_app)
