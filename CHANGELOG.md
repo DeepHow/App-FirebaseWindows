@@ -1,3 +1,7 @@
+## 0.0.3
+
+- **FIX**: fix cmake error when firebase sdk has been added to project. ([8350095f](https://github.com/ipliu/firebase_windows/commit/8350095fa7528b5e29532182d78645c90d913296))
+
 ## 0.0.2
 
 - **FEAT**: change example required Dart SDK version. ([c57e2eb1](https://github.com/ipliu/firebase_windows/commit/c57e2eb1c3aae598bda6a94069fbf56a82e9eb3d))
