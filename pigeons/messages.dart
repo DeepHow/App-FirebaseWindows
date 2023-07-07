@@ -6,7 +6,7 @@ import 'package:pigeon/pigeon.dart';
 
 @ConfigurePigeon(
   PigeonOptions(
-    dartOut: 'lib/src/pigeon/messages.pigeon.dart',
+    dartOut: 'lib/firebase_core_platform_interface/src/pigeon/messages.pigeon.dart',
     cppHeaderOut: 'windows/messages.g.h',
     cppSourceOut: 'windows/messages.g.cpp',
     cppOptions: CppOptions(namespace: 'firebase_windows'),

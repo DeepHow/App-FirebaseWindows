@@ -4,9 +4,11 @@ Windows implementations of the Firebase Flutter plugin for Flutter apps.
 
 > Note: This plugin code is based on https://github.com/firebase/flutterfire. ([3f1608a5](https://github.com/firebase/flutterfire/commit/3f1608a59452833b078c6db2a3872cf0aa27d5ba))
 >
-> firebase_core: [v2.12.0](https://github.com/firebase/flutterfire/tree/firebase_core-v2.12.0/packages/firebase_core/firebase_core)
-> 
-> firebase_auth: [v4.6.0](https://github.com/firebase/flutterfire/tree/firebase_auth-v4.6.0/packages/firebase_auth/firebase_auth)
+> - _flutterfire_internals: [v1.3.0](https://github.com/firebase/flutterfire/tree/_flutterfire_internals-v1.3.0/packages/_flutterfire_internals)
+> - firebase_core_platform_interface: [v4.8.0](https://github.com/firebase/flutterfire/tree/firebase_core_platform_interface-v4.8.0/packages/firebase_core/firebase_core_platform_interface)
+> - firebase_core: [v2.12.0](https://github.com/firebase/flutterfire/tree/firebase_core-v2.12.0/packages/firebase_core/firebase_core)
+> - firebase_auth_platform_interface: [v6.15.0](https://github.com/firebase/flutterfire/tree/firebase_auth_platform_interface-v6.15.0/packages/firebase_auth/firebase_auth_platform_interface)
+> - firebase_auth: [v4.6.0](https://github.com/firebase/flutterfire/tree/firebase_auth-v4.6.0/packages/firebase_auth/firebase_auth)
 > 
 > And file *windows/CMakeLists.txt* is based on firebase_core: v2.13.1. [CMakeLists.txt](https://github.com/firebase/flutterfire/blob/firebase_core-v2.13.1/packages/firebase_core/firebase_core/windows/CMakeLists.txt)
 
