@@ -8,6 +8,7 @@
 
 #include "firebase_core_plugin.h"
 #include "firebase_auth_plugin.h"
+#include "firebase_storage_plugin.h"
 
 void FirebaseWindowsPluginCApiRegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar) {
@@ -15,6 +16,9 @@ void FirebaseWindowsPluginCApiRegisterWithRegistrar(
       flutter::PluginRegistrarManager::GetInstance()
           ->GetRegistrar<flutter::PluginRegistrarWindows>(registrar));
   firebase_windows::FirebaseAuthPlugin::RegisterWithRegistrar(
+      flutter::PluginRegistrarManager::GetInstance()
+          ->GetRegistrar<flutter::PluginRegistrarWindows>(registrar));
+  firebase_windows::FirebaseStoragePlugin::RegisterWithRegistrar(
       flutter::PluginRegistrarManager::GetInstance()
           ->GetRegistrar<flutter::PluginRegistrarWindows>(registrar));
 }

@@ -9,6 +9,7 @@
 
 #include "firebase/app.h"
 #include "firebase/auth.h"
+#include "firebase/storage.h"
 #include "firebase/util.h"
 #include "messages.g.h"
 #include "utils.h"
@@ -25,6 +26,7 @@
 
 using ::firebase::App;
 using ::firebase::auth::Auth;
+using ::firebase::storage::Storage;
 
 namespace firebase_windows {
 
@@ -107,6 +109,12 @@ void FirebaseCorePlugin::InitializeApp(
         Utils::LogD("Attempt to initialize Firebase Auth.");
         ::firebase::InitResult init_result;
         Auth::GetAuth(app, &init_result);
+        return init_result;
+      },
+      [](::firebase::App* app, void*) {
+        Utils::LogD("Attempt to initialize Cloud Storage.");
+        ::firebase::InitResult init_result;
+        Storage::GetInstance(app, &init_result);
         return init_result;
       }
   };

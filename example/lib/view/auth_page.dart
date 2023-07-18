@@ -217,7 +217,7 @@ class _AuthPageState extends State<AuthPage> {
               child: SizedBox(
                 width: 600,
                 child: TextField(
-                enabled: !isSignIn,
+                  enabled: !isSignIn,
                   controller: _textEditingController2,
                   decoration: InputDecoration(
                     labelText: getTextFieldLabel(2),
@@ -231,7 +231,7 @@ class _AuthPageState extends State<AuthPage> {
               child: SizedBox(
                 width: 600,
                 child: TextField(
-                enabled: !isSignIn,
+                  enabled: !isSignIn,
                   controller: _textEditingController3,
                   decoration: InputDecoration(
                     labelText: getTextFieldLabel(3),

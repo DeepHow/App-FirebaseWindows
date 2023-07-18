@@ -7,6 +7,7 @@ import 'package:firebase_windows/firebase_windows.dart';
 import 'debug_widget.dart';
 import 'firebase_options.dart';
 import 'view/auth_page.dart';
+import 'view/storage_page.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -25,7 +26,11 @@ class _MyAppState extends State<MyApp> {
   final TextEditingController _debugTextEditingController =
       TextEditingController();
 
+  FirebaseAuth? _auth;
+
   bool get isInitialized => Firebase.apps.isNotEmpty;
+
+  bool get isSignIn => _auth?.currentUser != null;
 
   String? get appName => isInitialized ? Firebase.apps.first.name : null;
 
@@ -33,6 +38,7 @@ class _MyAppState extends State<MyApp> {
     FirebaseApp app = await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    _auth = FirebaseAuth.instanceFor(app: app);
     setState(() {});
     log('Initialized default app $app');
   }
@@ -53,6 +59,15 @@ class _MyAppState extends State<MyApp> {
       context,
       MaterialPageRoute(builder: (context) => AuthPage(app: Firebase.app())),
     );
+    setState(() {});
+  }
+
+  Future<void> openStoragePage() async {
+    await Navigator.push<AuthPage>(
+      context,
+      MaterialPageRoute(builder: (context) => StoragePage(app: Firebase.app())),
+    );
+    setState(() {});
   }
 
   void log(String msg) {
@@ -71,6 +86,7 @@ class _MyAppState extends State<MyApp> {
         child: Column(
           children: [
             Text('Initialized app name: $appName\n'),
+            Text('Current user: ${_auth?.currentUser?.displayName}\n'),
             SizedBox(
               width: 800,
               child: Row(
@@ -91,6 +107,10 @@ class _MyAppState extends State<MyApp> {
                   ElevatedButton(
                     onPressed: isInitialized ? openAuthPage : null,
                     child: const Text('Open Auth page'),
+                  ),
+                  ElevatedButton(
+                    onPressed: isSignIn ? openStoragePage : null,
+                    child: const Text('Open Storage page'),
                   ),
                 ],
               ),

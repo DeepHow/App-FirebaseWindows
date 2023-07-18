@@ -9,6 +9,8 @@ Windows implementations of the Firebase Flutter plugin for Flutter apps.
 > - firebase_core: [v2.12.0](https://github.com/firebase/flutterfire/tree/firebase_core-v2.12.0/packages/firebase_core/firebase_core)
 > - firebase_auth_platform_interface: [v6.15.0](https://github.com/firebase/flutterfire/tree/firebase_auth_platform_interface-v6.15.0/packages/firebase_auth/firebase_auth_platform_interface)
 > - firebase_auth: [v4.6.0](https://github.com/firebase/flutterfire/tree/firebase_auth-v4.6.0/packages/firebase_auth/firebase_auth)
+> - firebase_storage_platform_interface: [v4.4.0](https://github.com/firebase/flutterfire/tree/firebase_storage_platform_interface-v4.4.0/packages/firebase_storage/firebase_storage_platform_interface)
+> - firebase_storage: [v11.2.0](https://github.com/firebase/flutterfire/tree/firebase_storage-v11.2.0/packages/firebase_storage/firebase_storage)
 > 
 > And file *windows/CMakeLists.txt* is based on firebase_core: v2.13.1. [CMakeLists.txt](https://github.com/firebase/flutterfire/blob/firebase_core-v2.13.1/packages/firebase_core/firebase_core/windows/CMakeLists.txt)
 
@@ -27,4 +29,8 @@ Currently only the following modules/features are implemented.
   - `FirebaseAuth.signInWithEmailAndPassword`
   - `FirebaseAuth.signOut`
   - `User.getIdTokenResult`
+- [firebase_storage](https://github.com/firebase/flutterfire/tree/master/packages/firebase_storage/firebase_storage)
+  - `Reference.getDownloadURL`
+  - `Reference.putFile`
+  - `UploadTask.cancel`
 

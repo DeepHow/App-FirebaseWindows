@@ -61,6 +61,8 @@ list(APPEND PLUGIN_SOURCES
   "firebase_core_plugin.h"
   "firebase_auth_plugin.cpp"
   "firebase_auth_plugin.h"
+  "firebase_storage_plugin.cpp"
+  "firebase_storage_plugin.h"
   "messages.g.cpp"
   "messages.g.h"
   "utils.cpp"
@@ -96,7 +98,7 @@ if (NOT TARGET firebase_app)
 endif()
 target_include_directories(${PLUGIN_NAME} INTERFACE
   "${FIREBASE_CPP_SDK_DIR}/include")
-set(firebase_libs firebase_auth firebase_app)
+set(firebase_libs firebase_storage firebase_auth firebase_app)
 foreach(firebase_lib IN ITEMS ${firebase_libs})
     get_target_property(firebase_lib_path ${firebase_lib} IMPORTED_LOCATION)
     string(REPLACE "Debug" "Release" firebase_lib_release_path ${firebase_lib_path})
