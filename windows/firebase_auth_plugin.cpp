@@ -4,7 +4,6 @@
 #include <windows.h>
 
 #include "firebase/app.h"
-#include "firebase/auth.h"
 #include "utils.h"
 
 #include <flutter/event_channel.h>
@@ -137,24 +136,124 @@ const char* GetAuthErrorName(AuthError value) {
   return table[value];
 }
 
-template <typename T = flutter::EncodableValue>
-class ChannelStreamHandler : public flutter::StreamHandler<T> {
+class AuthStateChangeListener : public firebase::auth::AuthStateListener {
  public:
-  ChannelStreamHandler() = default;
-  virtual ~ChannelStreamHandler() = default;
+  AuthStateChangeListener() = default;
+
+  virtual void OnAuthStateChanged(Auth* auth) {  // NOLINT
+    const User *user = auth->current_user();
+    if (user) {
+      Utils::LogD(
+          "OnAuthStateChanged, current_user is '%s'",
+          user->display_name().c_str());
+      if (events_) {
+        events_->Success(FirebaseAuthPlugin::ParseUserCredential(user));
+      }
+    } else {
+      Utils::LogD("OnAuthStateChanged, current_user is null");
+      if (events_) {
+        events_->Success(
+            flutter::EncodableValue(flutter::EncodableMap::map()));
+      }
+    }
+  }
+
+  void SetEventSink(
+      std::unique_ptr<flutter::EventSink<flutter::EncodableValue>>&& events) {
+    events_ = std::move(events);
+  }
+
+ private:
+  std::unique_ptr<
+      flutter::EventSink<flutter::EncodableValue>>&& events_ = nullptr;
+};
+
+class IdTokenChangeListener : public firebase::auth::IdTokenListener {
+ public:
+  IdTokenChangeListener() = default;
+
+  virtual void OnIdTokenChanged(Auth* auth) {  // NOLINT
+    User *user = auth->current_user();
+    if (user) {
+      Utils::LogD(
+          "OnIdTokenChanged, current_user is '%s'",
+          user->display_name().c_str());
+      if (events_) {
+        events_->Success(FirebaseAuthPlugin::ParseUserCredential(user));
+      }
+    } else {
+      Utils::LogD("OnIdTokenChanged, current_user is null");
+      if (events_) {
+        events_->Success(
+            flutter::EncodableValue(flutter::EncodableMap::map()));
+      }
+    }
+  }
+
+  void SetEventSink(
+      std::unique_ptr<flutter::EventSink<flutter::EncodableValue>>&& events) {
+    events_ = std::move(events);
+  }
+
+ private:
+  std::unique_ptr<
+      flutter::EventSink<flutter::EncodableValue>>&& events_ = nullptr;
+};
+
+template <typename T = flutter::EncodableValue>
+class AuthStateChannelStreamHandler : public flutter::StreamHandler<T> {
+ public:
+  AuthStateChannelStreamHandler(Auth *auth) : auth_(auth) {}
+  virtual ~AuthStateChannelStreamHandler() = default;
 
   virtual std::unique_ptr<flutter::StreamHandlerError<T>> OnListenInternal(
       const T* arguments,
       std::unique_ptr<flutter::EventSink<T>>&& events) override {
-    // TODO: needs to implement
+    listener_.SetEventSink(std::move(events));
+    auth_->AddAuthStateListener(&listener_);
     return nullptr;
   }
 
   virtual std::unique_ptr<flutter::StreamHandlerError<T>> OnCancelInternal(
       const T* arguments) override {
-    // TODO: needs to implement
+    if (&listener_) {
+      auth_->RemoveAuthStateListener(&listener_);
+    }
+    (void)listener_;
     return nullptr;
   }
+
+ private:
+  Auth *auth_;
+  AuthStateChangeListener listener_;
+};
+
+template <typename T = flutter::EncodableValue>
+class IdTokenChannelStreamHandler : public flutter::StreamHandler<T> {
+ public:
+  IdTokenChannelStreamHandler(Auth *auth) : auth_(auth) {}
+  virtual ~IdTokenChannelStreamHandler() = default;
+
+  virtual std::unique_ptr<flutter::StreamHandlerError<T>> OnListenInternal(
+      const T* arguments,
+      std::unique_ptr<flutter::EventSink<T>>&& events) override {
+    listener_.SetEventSink(std::move(events));
+    auth_->AddIdTokenListener(&listener_);
+    return nullptr;
+  }
+
+  virtual std::unique_ptr<flutter::StreamHandlerError<T>> OnCancelInternal(
+      const T* arguments) override {
+    if (&listener_) {
+      auth_->RemoveIdTokenListener(&listener_);
+    }
+    (void)listener_;
+    return nullptr;
+  }
+
+ private:
+  Auth *auth_;
+  IdTokenChangeListener listener_;
 };
 
 // static
@@ -181,7 +280,7 @@ FirebaseAuthPlugin::FirebaseAuthPlugin() {}
 
 FirebaseAuthPlugin::~FirebaseAuthPlugin() {}
 
-flutter::EncodableMap ParseFirebaseUser(const User *user) {
+flutter::EncodableMap FirebaseAuthPlugin::ParseFirebaseUser(const User *user) {
   auto output = flutter::EncodableMap::map();
   auto metadata = flutter::EncodableMap::map();
 
@@ -223,7 +322,8 @@ flutter::EncodableMap ParseFirebaseUser(const User *user) {
   return output;
 }
 
-flutter::EncodableMap ParseUserCredential(const User *user) {
+flutter::EncodableMap FirebaseAuthPlugin::ParseUserCredential(
+    const User *user) {
   auto output = flutter::EncodableMap::map();
 
   output.insert(std::pair<flutter::EncodableValue, flutter::EncodableValue>(
@@ -233,7 +333,8 @@ flutter::EncodableMap ParseUserCredential(const User *user) {
   return output;
 }
 
-flutter::EncodableMap ParseTokenResult(const std::string *token) {
+flutter::EncodableMap FirebaseAuthPlugin::ParseTokenResult(
+    const std::string *token) {
   auto output = flutter::EncodableMap::map();
 
   output.insert(std::pair<flutter::EncodableValue, flutter::EncodableValue>(
@@ -243,8 +344,9 @@ flutter::EncodableMap ParseTokenResult(const std::string *token) {
   return output;
 }
 
-flutter::EncodableMap ParseErrorDetails(const std::string &error_code,
-                                        const std::string &error_message) {
+flutter::EncodableMap FirebaseAuthPlugin::ParseErrorDetails(
+    const std::string &error_code,
+    const std::string &error_message) {
   auto output = flutter::EncodableMap::map();
 
   output.insert(std::pair<flutter::EncodableValue, flutter::EncodableValue>(
@@ -257,7 +359,7 @@ flutter::EncodableMap ParseErrorDetails(const std::string &error_code,
   return output;
 }
 
-void RegisterIdTokenListener(
+void FirebaseAuthPlugin::RegisterIdTokenListener(
     const flutter::EncodableMap *arguments,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
   auto *app_name = std::get_if<std::string>(
@@ -268,7 +370,8 @@ void RegisterIdTokenListener(
   auto channel = std::make_unique<flutter::EventChannel<flutter::EncodableValue>>(
       binaryMessenger_, name, &flutter::StandardMethodCodec::GetInstance());
 
-  auto handler = new ChannelStreamHandler<>();
+  App *app = App::GetInstance(app_name->c_str());
+  auto handler = new IdTokenChannelStreamHandler<>(Auth::GetAuth(app));
   auto _obj_stm_handle =
       static_cast<flutter::StreamHandler<flutter::EncodableValue>*>(handler);
   std::unique_ptr<flutter::StreamHandler<flutter::EncodableValue>> _ptr {_obj_stm_handle};
@@ -277,7 +380,7 @@ void RegisterIdTokenListener(
   result->Success(flutter::EncodableValue(name));
 }
 
-void RegisterAuthStateListener(
+void FirebaseAuthPlugin::RegisterAuthStateListener(
     const flutter::EncodableMap *arguments,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
   auto *app_name = std::get_if<std::string>(
@@ -288,7 +391,8 @@ void RegisterAuthStateListener(
   auto channel = std::make_unique<flutter::EventChannel<flutter::EncodableValue>>(
       binaryMessenger_, name, &flutter::StandardMethodCodec::GetInstance());
 
-  auto handler = new ChannelStreamHandler<>();
+  App *app = App::GetInstance(app_name->c_str());
+  auto handler = new AuthStateChannelStreamHandler<>(Auth::GetAuth(app));
   auto _obj_stm_handle =
       static_cast<flutter::StreamHandler<flutter::EncodableValue>*>(handler);
   std::unique_ptr<flutter::StreamHandler<flutter::EncodableValue>> _ptr {_obj_stm_handle};
@@ -297,7 +401,7 @@ void RegisterAuthStateListener(
   result->Success(flutter::EncodableValue(name));
 }
 
-void SignInWithCredential(
+void FirebaseAuthPlugin::SignInWithCredential(
     const flutter::EncodableMap *arguments,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
   auto *app_name = std::get_if<std::string>(
@@ -324,7 +428,7 @@ void SignInWithCredential(
       provider_id->c_str(), id_token->c_str(), access_token->c_str());
   Future<User*> future = auth->SignInWithCredential(oauth_credential);
   future.OnCompletion(
-      [result=shared_result](const Future<User*> &completed_future) {
+      [&, result=shared_result](const Future<User*> &completed_future) {
     if (completed_future.error() == 0) {
       const User* user = *(completed_future.result());
       Utils::LogD(
@@ -345,7 +449,7 @@ void SignInWithCredential(
   });
 }
 
-void SignInWithCustomToken(
+void FirebaseAuthPlugin::SignInWithCustomToken(
     const flutter::EncodableMap *arguments,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
   auto *app_name = std::get_if<std::string>(
@@ -363,7 +467,7 @@ void SignInWithCustomToken(
 
   Future<User*> future = auth->SignInWithCustomToken(token->c_str());
   future.OnCompletion(
-      [result=shared_result](const Future<User*> &completed_future) {
+      [&, result=shared_result](const Future<User*> &completed_future) {
     if (completed_future.error() == 0) {
       const User* user = *(completed_future.result());
       Utils::LogD(
@@ -384,7 +488,7 @@ void SignInWithCustomToken(
   });
 }
 
-void SignInWithEmailAndPassword(
+void FirebaseAuthPlugin::SignInWithEmailAndPassword(
     const flutter::EncodableMap *arguments,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
   auto *app_name = std::get_if<std::string>(
@@ -405,7 +509,7 @@ void SignInWithEmailAndPassword(
   Future<User*> future =
       auth->SignInWithEmailAndPassword(email->c_str(), password->c_str());
   future.OnCompletion(
-      [result=shared_result](const Future<User*> &completed_future) {
+      [&, result=shared_result](const Future<User*> &completed_future) {
     if (completed_future.error() == 0) {
       const User* user = *(completed_future.result());
       Utils::LogD(
@@ -426,7 +530,7 @@ void SignInWithEmailAndPassword(
   });
 }
 
-void SignOut(const flutter::EncodableMap *arguments,
+void FirebaseAuthPlugin::SignOut(const flutter::EncodableMap *arguments,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
   auto *app_name = std::get_if<std::string>(
       &(arguments->find(flutter::EncodableValue("appName"))->second));
@@ -440,7 +544,7 @@ void SignOut(const flutter::EncodableMap *arguments,
   result->Success();
 }
 
-void GetIdToken(const flutter::EncodableMap *arguments,
+void FirebaseAuthPlugin::GetIdToken(const flutter::EncodableMap *arguments,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
   auto *app_name = std::get_if<std::string>(
       &(arguments->find(flutter::EncodableValue("appName"))->second));
@@ -458,7 +562,7 @@ void GetIdToken(const flutter::EncodableMap *arguments,
 
   Future<std::string> future = auth->current_user()->GetToken(force_refresh);
   future.OnCompletion(
-      [result=shared_result](const Future<std::string> &completed_future) {
+      [&, result=shared_result](const Future<std::string> &completed_future) {
     if (completed_future.error() == 0) {
       result->Success(flutter::EncodableValue(
           ParseTokenResult(completed_future.result())));

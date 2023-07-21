@@ -38,8 +38,11 @@ class _MyAppState extends State<MyApp> {
     FirebaseApp app = await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    _auth = FirebaseAuth.instanceFor(app: app);
-    setState(() {});
+    _auth = FirebaseAuth.instanceFor(app: app)
+      ..authStateChanges().listen((event) {
+        log('authStateChanges, event: $event');
+        setState(() {});
+      });
     log('Initialized default app $app');
   }
 
@@ -59,7 +62,6 @@ class _MyAppState extends State<MyApp> {
       context,
       MaterialPageRoute(builder: (context) => AuthPage(app: Firebase.app())),
     );
-    setState(() {});
   }
 
   Future<void> openStoragePage() async {
@@ -67,7 +69,6 @@ class _MyAppState extends State<MyApp> {
       context,
       MaterialPageRoute(builder: (context) => StoragePage(app: Firebase.app())),
     );
-    setState(() {});
   }
 
   void log(String msg) {
