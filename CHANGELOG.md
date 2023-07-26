@@ -1,6 +1,12 @@
+## 0.0.5
+
+- **FIX**(auth): fix initialization not passing current user into plugin constants. ([afa2cec5](https://github.com/ipliu/firebase_windows/commit/afa2cec51e915531538bc83ca4705d8dc35f89d9))
+- **FEAT**(core, auth, storage): add firebase_plugin.h for all plugins to implement. ([afa2cec5](https://github.com/ipliu/firebase_windows/commit/afa2cec51e915531538bc83ca4705d8dc35f89d9))
+- **FEAT**(auth): add IdTokenChangeListener and AuthStateChangeListener. ([f6b8e6e9](https://github.com/ipliu/firebase_windows/commit/f6b8e6e99f678d6f6675ab0238fcdc94cfe15e04))
+
 ## 0.0.4
 
-- **FEAT**: add firebase storage. ([5947aa14](https://github.com/ipliu/firebase_windows/commit/5947aa14c0ad4f5f27f4d52f794c1d1902199d28))
+- **FEAT**(storage): add firebase storage. ([5947aa14](https://github.com/ipliu/firebase_windows/commit/5947aa14c0ad4f5f27f4d52f794c1d1902199d28))
 - **REFACTOR**: refactor code structure. ([a2599efc](https://github.com/ipliu/firebase_windows/commit/a2599efc689186128593d55cd53ae5ac10141c2d))
 
 ## 0.0.3
