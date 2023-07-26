@@ -261,6 +261,7 @@ void FirebaseStoragePlugin::ReferenceGetDownloadURL(
   future.OnCompletion(
       [&, result=shared_result](const Future<std::string> &completed_future) {
     if (completed_future.error() == 0) {
+      Utils::LogD("  Storage::ReferenceGetDownloadURL() completed.");
       auto output = flutter::EncodableMap::map();
       output.insert(std::pair<flutter::EncodableValue, flutter::EncodableValue>(
           flutter::EncodableValue("downloadURL"),
