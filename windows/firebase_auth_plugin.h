@@ -1,6 +1,7 @@
 #ifndef FLUTTER_PLUGIN_FIREBASE_AUTH_PLUGIN_H_
 #define FLUTTER_PLUGIN_FIREBASE_AUTH_PLUGIN_H_
 
+#include "firebase_plugin.h"
 #include "firebase/auth.h"
 
 #include <flutter/encodable_value.h>
@@ -11,7 +12,8 @@
 
 namespace firebase_windows {
 
-class FirebaseAuthPlugin : public flutter::Plugin {
+class FirebaseAuthPlugin : public flutter::Plugin,
+                           public FirebasePlugin {
  public:
   static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
 
@@ -22,6 +24,11 @@ class FirebaseAuthPlugin : public flutter::Plugin {
   // Disallow copy and assign.
   FirebaseAuthPlugin(const FirebaseAuthPlugin&) = delete;
   FirebaseAuthPlugin& operator=(const FirebaseAuthPlugin&) = delete;
+
+  // FirebasePlugin
+  virtual flutter::EncodableMap PluginConstantsForFIRApp(firebase::App* app);
+
+  virtual std::string FlutterChannelName();
 
   // Called when a method is called on this plugin's channel from Dart.
   void HandleMethodCall(

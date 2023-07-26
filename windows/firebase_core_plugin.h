@@ -12,11 +12,13 @@
 
 #include <memory>
 
+#include "firebase_plugin.h"
 #include "messages.g.h"
 
 namespace firebase_windows {
 
 class FirebaseCorePlugin : public flutter::Plugin,
+                           public FirebasePlugin,
                            public FirebaseCoreHostApi,
                            public FirebaseAppHostApi {
  public:
@@ -29,6 +31,11 @@ class FirebaseCorePlugin : public flutter::Plugin,
   // Disallow copy and assign.
   FirebaseCorePlugin(const FirebaseCorePlugin &) = delete;
   FirebaseCorePlugin &operator=(const FirebaseCorePlugin &) = delete;
+
+  // FirebasePlugin
+  virtual flutter::EncodableMap PluginConstantsForFIRApp(firebase::App* app);
+
+  virtual std::string FlutterChannelName();
 
   // FirebaseCoreHostApi
   virtual void InitializeApp(

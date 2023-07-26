@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 #include "firebase_core_plugin.h"
+#include "firebase_plugin_registry.h"
 
 // This must be included before many other Windows headers.
 #include <windows.h>
@@ -37,6 +38,10 @@ void FirebaseCorePlugin::RegisterWithRegistrar(
 
   FirebaseCoreHostApi::SetUp(registrar->messenger(), plugin.get());
   FirebaseAppHostApi::SetUp(registrar->messenger(), plugin.get());
+
+  auto firebase_plugin = plugin.get();
+  FirebasePluginRegistry::getInstance()
+      .RegisterFirebasePlugin(*firebase_plugin);
 
   registrar->AddPlugin(std::move(plugin));
 }
@@ -90,7 +95,18 @@ PigeonInitializeResponse AppToPigeonInitializeResponse(const App &app) {
   PigeonInitializeResponse response = PigeonInitializeResponse();
   response.set_name(app.name());
   response.set_options(optionsFromFIROptions(app.options()));
+  response.set_plugin_constants(
+      FirebasePluginRegistry::getInstance()
+      .PluginConstantsForFIRApp(App::GetInstance(app.name())));
   return response;
+}
+
+flutter::EncodableMap FirebaseCorePlugin::PluginConstantsForFIRApp(App* app) {
+  return flutter::EncodableMap::map();
+}
+
+std::string FirebaseCorePlugin::FlutterChannelName() {
+  return "dev.flutter.pigeon.FirebaseCoreHostApi.initializeApp";
 }
 
 void FirebaseCorePlugin::InitializeApp(

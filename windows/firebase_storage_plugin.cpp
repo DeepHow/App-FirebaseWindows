@@ -1,3 +1,4 @@
+#include "firebase_plugin_registry.h"
 #include "firebase_storage_plugin.h"
 
 // This must be included before many other Windows headers.
@@ -211,6 +212,10 @@ void FirebaseStoragePlugin::RegisterWithRegistrar(
 
   auto plugin = std::make_unique<FirebaseStoragePlugin>();
 
+  auto firebase_plugin = plugin.get();
+  FirebasePluginRegistry::getInstance()
+      .RegisterFirebasePlugin(*firebase_plugin);
+
   channel->SetMethodCallHandler(
       [plugin_pointer = plugin.get()](const auto &call, auto result) {
     plugin_pointer->HandleMethodCall(call, std::move(result));
@@ -222,6 +227,15 @@ void FirebaseStoragePlugin::RegisterWithRegistrar(
 FirebaseStoragePlugin::FirebaseStoragePlugin() {}
 
 FirebaseStoragePlugin::~FirebaseStoragePlugin() {}
+
+flutter::EncodableMap FirebaseStoragePlugin::PluginConstantsForFIRApp(
+    App* app) {
+  return flutter::EncodableMap::map();
+}
+
+std::string FirebaseStoragePlugin::FlutterChannelName() {
+  return kFirebaseStorageChannelName;
+}
 
 void FirebaseStoragePlugin::ReferenceGetDownloadURL(
     const flutter::EncodableMap *arguments,

@@ -1,6 +1,7 @@
 #ifndef FLUTTER_PLUGIN_FIREBASE_STORAGE_PLUGIN_H_
 #define FLUTTER_PLUGIN_FIREBASE_STORAGE_PLUGIN_H_
 
+#include "firebase_plugin.h"
 #include "firebase/storage.h"
 
 #include <flutter/encodable_value.h>
@@ -11,7 +12,8 @@
 
 namespace firebase_windows {
 
-class FirebaseStoragePlugin : public flutter::Plugin {
+class FirebaseStoragePlugin : public flutter::Plugin,
+                              public FirebasePlugin {
  public:
   std::map<int, ::firebase::storage::Controller*> task_controllers;
 
@@ -24,6 +26,11 @@ class FirebaseStoragePlugin : public flutter::Plugin {
   // Disallow copy and assign.
   FirebaseStoragePlugin(const FirebaseStoragePlugin&) = delete;
   FirebaseStoragePlugin& operator=(const FirebaseStoragePlugin&) = delete;
+
+  // FirebasePlugin
+  virtual flutter::EncodableMap PluginConstantsForFIRApp(firebase::App* app);
+
+  virtual std::string FlutterChannelName();
 
   // Called when a method is called on this plugin's channel from Dart.
   void HandleMethodCall(

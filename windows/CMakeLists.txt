@@ -57,6 +57,9 @@ set(PLUGIN_NAME "firebase_windows_plugin")
 
 # Any new source files that you add to the plugin should be added here.
 list(APPEND PLUGIN_SOURCES
+  "firebase_plugin.h"
+  "firebase_plugin_registry.cpp"
+  "firebase_plugin_registry.h"
   "firebase_core_plugin.cpp"
   "firebase_core_plugin.h"
   "firebase_auth_plugin.cpp"

@@ -1,4 +1,5 @@
 #include "firebase_auth_plugin.h"
+#include "firebase_plugin_registry.h"
 
 // This must be included before many other Windows headers.
 #include <windows.h>
@@ -141,6 +142,11 @@ class AuthStateChangeListener : public firebase::auth::AuthStateListener {
   AuthStateChangeListener() = default;
 
   virtual void OnAuthStateChanged(Auth* auth) {  // NOLINT
+    if (initialAuthState_) {
+      initialAuthState_ = false;
+      return;
+    }
+
     const User *user = auth->current_user();
     if (user) {
       Utils::LogD(
@@ -164,6 +170,7 @@ class AuthStateChangeListener : public firebase::auth::AuthStateListener {
   }
 
  private:
+  boolean initialAuthState_ = true;
   std::unique_ptr<
       flutter::EventSink<flutter::EncodableValue>>&& events_ = nullptr;
 };
@@ -173,6 +180,11 @@ class IdTokenChangeListener : public firebase::auth::IdTokenListener {
   IdTokenChangeListener() = default;
 
   virtual void OnIdTokenChanged(Auth* auth) {  // NOLINT
+    if (initialAuthState_) {
+      initialAuthState_ = false;
+      return;
+    }
+
     User *user = auth->current_user();
     if (user) {
       Utils::LogD(
@@ -196,6 +208,7 @@ class IdTokenChangeListener : public firebase::auth::IdTokenListener {
   }
 
  private:
+  boolean initialAuthState_ = true;
   std::unique_ptr<
       flutter::EventSink<flutter::EncodableValue>>&& events_ = nullptr;
 };
@@ -268,6 +281,10 @@ void FirebaseAuthPlugin::RegisterWithRegistrar(
 
   auto plugin = std::make_unique<FirebaseAuthPlugin>();
 
+  auto firebase_plugin = plugin.get();
+  FirebasePluginRegistry::getInstance()
+      .RegisterFirebasePlugin(*firebase_plugin);
+
   channel->SetMethodCallHandler(
       [plugin_pointer = plugin.get()](const auto &call, auto result) {
         plugin_pointer->HandleMethodCall(call, std::move(result));
@@ -279,6 +296,27 @@ void FirebaseAuthPlugin::RegisterWithRegistrar(
 FirebaseAuthPlugin::FirebaseAuthPlugin() {}
 
 FirebaseAuthPlugin::~FirebaseAuthPlugin() {}
+
+flutter::EncodableMap FirebaseAuthPlugin::PluginConstantsForFIRApp(App* app) {
+  Auth* auth = Auth::GetAuth(app);
+  User* user = auth->current_user();
+  auto output = flutter::EncodableMap::map();
+
+  output.insert(std::pair<flutter::EncodableValue, flutter::EncodableValue>(
+      flutter::EncodableValue("APP_LANGUAGE_CODE"),
+      flutter::EncodableValue(auth->language_code())));
+  if (user) {
+    output.insert(std::pair<flutter::EncodableValue, flutter::EncodableValue>(
+        flutter::EncodableValue("APP_CURRENT_USER"),
+        flutter::EncodableValue(ParseFirebaseUser(user))));
+  }
+
+  return output;
+}
+
+std::string FirebaseAuthPlugin::FlutterChannelName() {
+  return kFirebaseAuthChannelName;
+}
 
 flutter::EncodableMap FirebaseAuthPlugin::ParseFirebaseUser(const User *user) {
   auto output = flutter::EncodableMap::map();
