@@ -1,3 +1,9 @@
+## 0.0.6
+
+- **FIX**(storage): fix crash when calling storage ReferenceGetDownloadURL. ([ffa0fda5](https://github.com/ipliu/firebase_windows/commit/ffa0fda5120fa309c5100132149b298324861b71))
+- **FEAT**: update to Firebase C++ SDK version 10.7.0 ([896d04e9](https://github.com/ipliu/firebase_windows/commit/896d04e97076ee181ef3156ecd432343113c2909))
+- **FEAT**: change required Dart SDK version. ([328efc18](https://github.com/ipliu/firebase_windows/commit/328efc187e8d70ab5b0b3f3988b8601a01762dd8))
+
 ## 0.0.5
 
 - **FIX**(auth): fix initialization not passing current user into plugin constants. ([afa2cec5](https://github.com/ipliu/firebase_windows/commit/afa2cec51e915531538bc83ca4705d8dc35f89d9))

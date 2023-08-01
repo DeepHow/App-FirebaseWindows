@@ -1,6 +1,6 @@
 name: firebase_windows
 description: Windows implementations of the Firebase Flutter plugin for Flutter apps.
-version: 0.0.5
+version: 0.0.6
 homepage: https://github.com/ipliu/firebase_windows
 
 false_secrets:
