@@ -14,7 +14,9 @@
 #include <flutter/plugin_registrar_windows.h>
 #include <flutter/standard_method_codec.h>
 
+#include <condition_variable>
 #include <memory>
+#include <mutex>
 #include <sstream>
 
 using ::firebase::App;
@@ -251,34 +253,40 @@ void FirebaseStoragePlugin::ReferenceGetDownloadURL(
       "Calling Storage::ReferenceGetDownloadURL()..., app_name: %s, bucket: %s, path: %s",
       app_name->c_str(), bucket->c_str(), path->c_str());
 
-  std::shared_ptr<flutter::MethodResult<flutter::EncodableValue>> shared_result =
-      std::move(result);
   App *app = App::GetInstance(app_name->c_str());
   Storage *storage = Storage::GetInstance(app);
   StorageReference ref = storage->GetReference(path->c_str());
 
+  std::condition_variable cond_var;
   Future<std::string> future = ref.GetDownloadUrl();
   future.OnCompletion(
-      [&, result=shared_result](const Future<std::string> &completed_future) {
-    if (completed_future.error() == 0) {
-      Utils::LogD("  Storage::ReferenceGetDownloadURL() completed.");
-      auto output = flutter::EncodableMap::map();
-      output.insert(std::pair<flutter::EncodableValue, flutter::EncodableValue>(
-          flutter::EncodableValue("downloadURL"),
-          flutter::EncodableValue(completed_future.result()->c_str())));
-      result->Success(output);
-    } else {
-      Utils::LogE(
-          "  Storage::ReferenceGetDownloadURL() completed with error: %d, `%s`",
-          completed_future.error(), completed_future.error_message());
-      const char *error_code = GetStorageErrorName(
-          static_cast<StorageError>(completed_future.error()));
-      result->Error(
-          error_code,
-          completed_future.error_message(),
-          ParseErrorDetails(error_code, completed_future.error_message()));
-    }
-  });
+      [](const Future<std::string>& completed_future, void* user_data) {
+    std::condition_variable* cond_var = static_cast<std::condition_variable*>(user_data);
+    cond_var->notify_one();
+  }, &cond_var);
+
+  std::mutex mutex;
+  std::unique_lock<std::mutex> lock(mutex);
+  cond_var.wait(lock);
+
+  if (future.error() == 0) {
+    Utils::LogD("  Storage::ReferenceGetDownloadURL() completed.");
+    auto output = flutter::EncodableMap::map();
+    output.insert(std::pair<flutter::EncodableValue, flutter::EncodableValue>(
+        flutter::EncodableValue("downloadURL"),
+        flutter::EncodableValue(future.result()->c_str())));
+    result->Success(output);
+  } else {
+    Utils::LogE(
+        "  Storage::ReferenceGetDownloadURL() completed with error: %d, `%s`",
+        future.error(), future.error_message());
+    const char *error_code = GetStorageErrorName(
+        static_cast<StorageError>(future.error()));
+    result->Error(
+        error_code,
+        future.error_message(),
+        ParseErrorDetails(error_code, future.error_message()));
+  }
 }
 
 void FirebaseStoragePlugin::TaskStartPutFile(
