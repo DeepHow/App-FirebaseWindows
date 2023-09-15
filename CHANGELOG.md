@@ -1,3 +1,7 @@
+## 0.0.7
+
+- **DOCS**: change repository license and homepage
+
 ## 0.0.6
 
 - **FIX**(storage): fix crash when calling storage ReferenceGetDownloadURL. ([ffa0fda5](https://github.com/ipliu/firebase_windows/commit/ffa0fda5120fa309c5100132149b298324861b71))
